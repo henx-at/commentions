@@ -33,6 +33,36 @@ test('can render a comment', function () {
         ->assertActionVisible('delete'); // Author should see a delete action
 });
 
+test('links a comment author name and avatar when an author URL is resolved', function () {
+    $user = User::factory()->create();
+    actingAs($user);
+
+    $post = Post::factory()->create();
+    $comment = CommentModel::factory()->author($user)->commentable($post)->create();
+    $url = 'https://example.test/members/' . $user->getKey();
+
+    Config::resolveAuthorUrlUsing(fn (User $author): string => $author->is($user) ? $url : '');
+
+    livewire(CommentComponent::class, ['comment' => $comment])
+        ->assertSeeHtml('<a href="' . $url . '">' . $comment->getAuthorName() . '</a>')
+        ->assertSeeHtml('<a href="' . $url . '">');
+});
+
+test('renders a comment author name and avatar without links when no author URL is resolved', function () {
+    $user = User::factory()->create();
+    actingAs($user);
+
+    $post = Post::factory()->create();
+    $comment = CommentModel::factory()->author($user)->commentable($post)->create();
+    $url = 'https://example.test/members/' . $user->getKey();
+
+    Config::resolveAuthorUrlUsing(fn (): ?string => null);
+
+    livewire(CommentComponent::class, ['comment' => $comment])
+        ->assertDontSeeHtml('<a href="' . $url . '">')
+        ->assertSee($comment->getAuthorName());
+});
+
 test('other users cannot see edit and delete buttons by default', function () {
     $user = User::factory()->create();
     actingAs($user);

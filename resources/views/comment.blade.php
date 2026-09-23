@@ -1,6 +1,9 @@
 @php
     $toolbarButtons = $this->getToolbarButtons();
     $hasToolBar = is_array($toolbarButtons);
+    $authorUrl = $comment instanceof \Kirschbaum\Commentions\Comment
+        ? \Kirschbaum\Commentions\Config::resolveAuthorUrl($comment->author)
+        : null;
 @endphp
 
 <div
@@ -9,11 +12,17 @@
 >
     @if ($this->avatarsAreEnabled())
         @if ($avatar = $comment->getAuthorAvatar())
-            <img
-                src="{{ $comment->getAuthorAvatar() }}"
-                alt="{{ __('commentions::comments.user_avatar_alt') }}"
-                class="comm:w-10 comm:h-10 comm:rounded-full comm:mt-0.5 comm:object-cover comm:object-center"
-            />
+            @if ($authorUrl)
+                <a href="{{ $authorUrl }}">
+            @endif
+                <img
+                    src="{{ $comment->getAuthorAvatar() }}"
+                    alt="{{ __('commentions::comments.user_avatar_alt') }}"
+                    class="comm:w-10 comm:h-10 comm:rounded-full comm:mt-0.5 comm:object-cover comm:object-center"
+                />
+            @if ($authorUrl)
+                </a>
+            @endif
         @else
             <div class="comm:w-10 comm:h-10 comm:rounded-full comm:mt-0.5 "></div>
         @endif
@@ -22,7 +31,11 @@
     <div class="comm:flex-1 comm:min-w-0">
         <div class="comm:text-sm comm:font-bold comm:text-gray-900 comm:dark:text-gray-100 comm:flex comm:justify-between comm:items-center">
             <div>
-                {{ $comment->getAuthorName() }}
+                @if ($authorUrl)
+                    <a href="{{ $authorUrl }}">{{ $comment->getAuthorName() }}</a>
+                @else
+                    {{ $comment->getAuthorName() }}
+                @endif
                 <span
                     class="comm:text-xs comm:text-gray-500 comm:dark:text-gray-300"
                     title="{{ __('commentions::comments.commented_at', ['datetime' => $comment->getCreatedAt()->format('Y-m-d H:i:s')]) }}"

@@ -17,6 +17,8 @@ class Config
 
     protected static ?Closure $resolveCommentUrl = null;
 
+    protected static ?Closure $resolveAuthorUrl = null;
+
     protected static ?Closure $resolveTipTapCssClasses = null;
 
     /** @var array<Closure> */
@@ -85,6 +87,26 @@ class Config
         }
 
         return null;
+    }
+
+    /**
+     * Register a callback that resolves the URL for a comment author.
+     */
+    public static function resolveAuthorUrlUsing(Closure $callback): void
+    {
+        static::$resolveAuthorUrl = $callback;
+    }
+
+    /**
+     * Resolve the URL for a comment author, if one has been configured.
+     */
+    public static function resolveAuthorUrl(mixed $author): ?string
+    {
+        if ($author === null || ! (static::$resolveAuthorUrl instanceof Closure)) {
+            return null;
+        }
+
+        return call_user_func(static::$resolveAuthorUrl, $author);
     }
 
     public static function getCommentModel(): string
