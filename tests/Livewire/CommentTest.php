@@ -41,11 +41,18 @@ test('links a comment author name and avatar when an author URL is resolved', fu
     $comment = CommentModel::factory()->author($user)->commentable($post)->create();
     $url = 'https://example.test/members/' . $user->getKey();
 
-    Config::resolveAuthorUrlUsing(fn (User $author): string => $author->is($user) ? $url : '');
+    $resolvedComment = null;
+    Config::resolveAuthorUrlUsing(function (User $author, CommentModel $receivedComment) use ($user, $url, &$resolvedComment): string {
+        $resolvedComment = $receivedComment;
+
+        return $author->is($user) ? $url : '';
+    });
 
     livewire(CommentComponent::class, ['comment' => $comment])
         ->assertSeeHtml('<a href="' . $url . '">' . $comment->getAuthorName() . '</a>')
         ->assertSeeHtml('<a href="' . $url . '">');
+
+    expect($resolvedComment)->toBeModel($comment);
 });
 
 test('renders a comment author name and avatar without links when no author URL is resolved', function () {

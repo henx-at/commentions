@@ -91,6 +91,10 @@ class Config
 
     /**
      * Register a callback that resolves the URL for a comment author.
+     *
+     * The callback receives the author and its Comment. The second argument
+     * makes it possible to resolve URLs from the comment's context when a
+     * Livewire update request has no current route tenant.
      */
     public static function resolveAuthorUrlUsing(Closure $callback): void
     {
@@ -100,13 +104,13 @@ class Config
     /**
      * Resolve the URL for a comment author, if one has been configured.
      */
-    public static function resolveAuthorUrl(mixed $author): ?string
+    public static function resolveAuthorUrl(mixed $author, ?Comment $comment = null): ?string
     {
         if ($author === null || ! (static::$resolveAuthorUrl instanceof Closure)) {
             return null;
         }
 
-        return call_user_func(static::$resolveAuthorUrl, $author);
+        return call_user_func(static::$resolveAuthorUrl, $author, $comment);
     }
 
     public static function getCommentModel(): string

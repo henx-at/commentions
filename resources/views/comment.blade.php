@@ -2,7 +2,7 @@
     $toolbarButtons = $this->getToolbarButtons();
     $hasToolBar = is_array($toolbarButtons);
     $authorUrl = $comment instanceof \Kirschbaum\Commentions\Comment
-        ? \Kirschbaum\Commentions\Config::resolveAuthorUrl($comment->author)
+        ? \Kirschbaum\Commentions\Config::resolveAuthorUrl($comment->author, $comment)
         : null;
 @endphp
 
